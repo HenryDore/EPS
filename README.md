@@ -3,16 +3,16 @@
 The test repository for the EPS project
 
 v2.0
-<a href="eps2-0.html">Improved connection interface (STABLE)</a>
+<a href="eps2-0.html">Improved connection interface</a> (STABLE)
   
 v1.2
-<a href="eps1-2.html">Attempt at Improved graphing (BROKEN)</a>
+<a href="eps1-2.html">Attempt at Improved graphing)</a> (BROKEN
 
 v1.1
-<a href="eps1-1.html">Initial test - fixed formatting (UNKNOWN)</a>
+<a href="eps1-1.html">Initial test - fixed formatting</a> (STABLE)
 
 v1.0
-<a href="eps1-0.html">Initial test (STABLE)</a>
+<a href="eps1-0.html">Initial test</a> (STABLE)
 
 
 # Tests:
