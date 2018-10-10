@@ -1,6 +1,10 @@
 # EPS:
 
-The test repository for the EPS project: <a href="https://henrydore.github.io/EPS/">GitHub Pages</a>
+The test repository for the EPS project.
+
+<a href="https://henrydore.github.io/EPS/">EPS @ GitHub Pages</a>
+
+<hr>
 
 v2.0
 <a href="eps2-0.html">Improved connection interface</a> (STABLE)
