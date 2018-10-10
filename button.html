@@ -61,7 +61,7 @@
           }
         });
         // First, reset Puck.js
-        connection.write"reset();\n", function() { // First, reset Puck.js
+        connection.write("reset();\n", function() { // First, reset Puck.js
                     setTimeout(function() { // Wait for it to reset itself
                         // Tell puck to write analogueRead to pins D28 & D29 to Bluetooth at 10 ms intervals
                         // When disconnected, Puck.js resets so the setInterval doesn't keep draining battery.
