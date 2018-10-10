@@ -6,7 +6,7 @@ v2.0
 <a href="eps2-0.html">Improved connection interface</a> (STABLE)
   
 v1.2
-<a href="eps1-2.html">Attempt at Improved graphing)</a> (BROKEN
+<a href="eps1-2.html">Attempt at Improved graphing</a> (BROKEN)
 
 v1.1
 <a href="eps1-1.html">Initial test - fixed formatting</a> (STABLE)
