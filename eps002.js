@@ -1,3 +1,5 @@
+<script src="https://www.puck-js.com/puck.js"></script>
+
 var samples = 100;
 var speed = 250;
 var values = [];
