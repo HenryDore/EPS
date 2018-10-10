@@ -13,4 +13,4 @@ v1.2
 
 # Tests:
 
-<a href="button.html">Connect on puck button press</a>
+<a href="button.html">Improved connection protocol</a>
