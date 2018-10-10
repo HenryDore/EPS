@@ -4,7 +4,7 @@ The test repository for the EPS project.
 
 <h3> <a href="https://henrydore.github.io/EPS/">EPS @ GitHub Pages</a> </h3>
 
-<hr size="10">
+<hr size="1">
 
 v2.0
 <a href="eps2-0.html">Improved connection interface</a> (STABLE)
