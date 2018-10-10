@@ -1,4 +1,6 @@
-<script src="https://www.puck-js.com/puck.js"></script>
+var imported = document.createElement('script');
+imported.src = 'https://www.puck-js.com/puck.js';
+document.head.appendChild(imported);
 
 var samples = 100;
 var speed = 250;
