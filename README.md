@@ -17,4 +17,6 @@ v1.0
 
 # Tests:
 
+Random tests and thoughts on future work
+
 <a href="test1.html">Improved connection protocol</a>
