@@ -1,4 +1,4 @@
-# EPS
+# EPS:
 
 The test repository for the EPS project
 
@@ -13,4 +13,4 @@ v1.2
 
 # Tests:
 
-<a href="eps002.html">Connect on puck button press</a>
+<a href="button.html">Connect on puck button press</a>
