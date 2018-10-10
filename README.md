@@ -10,3 +10,7 @@ v1.1
 
 v1.2
 <a href="eps002.html">Improved graphing</a>
+
+# Tests:
+
+<a href="eps002.html">Connect on puck button press</a>
