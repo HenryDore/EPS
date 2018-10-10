@@ -77,7 +77,6 @@ labels.fill(0);
                     return;
                 }
                 connection = c;
-                elements.modal.remove(); // remove modal window on connection      
                 var buf = "";
                 connection.on("data", function(d) { // Handle the data we get back, and call 'onLine' when we get a line
                     buf += d;
