@@ -157,7 +157,8 @@ function advance() {
 window.onload = function() {
   initialize();
   advance();
-connectDevice();
+  setTimeout(function(){ alert("Ready to connect"); connectDevice();}, 3000);
+
 
 };
 
