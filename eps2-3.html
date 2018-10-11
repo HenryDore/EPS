@@ -1,1 +1,200 @@
+<html>
 
+<head>
+    <title>Puck.js Differential Graphing V2.3</title>
+    <style>
+
+        canvas {
+            display: inline-block !important;
+        }
+    
+        button {
+            background-color: black;
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            text-align: center;
+            font-size: 30px;
+            cursor: pointer;
+        }    
+
+    </style>
+
+    <script src="https://playground.abysscorp.org/chartjs/livecharts/dist/Chart.min.js"></script>
+    <script src="https://www.puck-js.com/puck.js"></script>
+    
+</head>
+
+<body>
+    <br>
+    
+    <center><button>Connect</button> <button>Disconnect</button>
+    
+    <br><br><br>
+    
+        <canvas id="chart0" style="width:512px;height:320px"></canvas>
+    
+    </center>
+
+
+    <script type="text/javascript">
+    
+        var samples = 100;
+        var speed = 1;
+
+        var values1 = [];
+
+        var labels1 = [];
+
+        var charts = [];
+        var value = 0;
+
+        values1.length = samples;
+        labels1.length = samples;
+        values1.fill(0);
+        labels1.fill(0);
+
+        var button = document.getElementsByTagName('button')[0];
+        var button2 = document.getElementsByTagName('button')[1];
+        var logelement = document.getElementById('log');
+
+        var EPS1V = 0;
+        var EPS2V = 0;
+
+        function initialize() {
+            charts.push(new Chart(document.getElementById("chart0"), {
+                type: 'line',
+                data: {
+                    labels: labels1,
+                    datasets: [{
+                            data: values1,
+
+                            borderColor: 'rgb(255, 0, 0)',
+                            borderWidth: 2,
+                            lineTension: 0.25,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    animation: {
+                        duration: speed * 1.5,
+                        easing: 'linear'
+                    },
+                    legend: false,
+                    scales: {
+                        xAxes: [{
+                            display: false
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                max: 0.1,
+                                min: -0.1
+                            }
+                        }]
+                    }
+                }
+            }));
+        }
+
+        function log(txt) {
+            //  logelement.innerHTML += txt + "\n"; //disabled for speed
+        }
+
+        function advance() {
+            value = EPS1V - EPS2V;
+            values1.push(value);
+            values1.shift();
+
+            charts.forEach(function(chart) {
+                chart.update();
+            });
+            setTimeout(function() {
+                requestAnimationFrame(advance);
+            }, speed);
+        }
+
+        window.onload = function() {
+            initialize();
+            advance();
+        }
+
+        // Called when we get a line of data (OLD CODE)
+        function onLine(v) {
+            log(v);
+            try {
+                var j = JSON.parse(v);
+                log(j.EPS1);
+                log(j.EPS2);
+                if (j.EPS1 !== undefined) {
+                    EPS1V = j.EPS1;
+                };
+                if (j.EPS2 !== undefined) {
+                    EPS2V = j.EPS2;
+                };
+                log(EPS1V);
+                log(EPS2V);
+
+            } catch (e) { // else return failed line
+                log("Failed Received: ", v);
+            }
+        }
+
+        var connection;
+
+        button2.addEventListener("click", function() {
+            if (connection) {
+                connection.close();
+                connection = undefined;
+
+                log("Connection Closed");
+
+            }
+        })
+
+        button.addEventListener("click", function() {
+            if (connection) {
+                log("Closing connection");
+                connection.close();
+                connection = undefined;
+            }
+            log("Opening connection");
+            Puck.connect(function(c) {
+                if (!c) {
+                    log("Couldn't connect!");
+                    return;
+                }
+                log("Connecting...");
+                connection = c;
+                // Handle the data we get back, and call 'onLine'
+                // whenever we get a line
+                var buf = "";
+                connection.on("data", function(d) {
+                    buf += d;
+                    var i = buf.indexOf("\n");
+                    while (i >= 0) {
+                        onLine(buf.substr(0, i));
+                        buf = buf.substr(i + 1);
+                        i = buf.indexOf("\n");
+                    }
+                });
+                // First, reset Puck.js
+                connection.write("reset();\n", function() { // First, reset Puck.js
+                    setTimeout(function() { // Wait for it to reset itself
+                        // Tell puck to write analogueRead to pins D28 & D29 to Bluetooth at 1 ms intervals
+                        // When disconnected, Puck.js resets so the setInterval doesn't keep draining battery.
+                        connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS1:analogRead(D28)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
+                            // log("Ready...");
+                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D29)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
+                                //    log("Ready...");
+                            });
+                        }, 1000); //eo setTimeout});
+                    }, 1000); //eo setTimeout
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
