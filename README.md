@@ -2,6 +2,9 @@
 
 The test repository for the EPS project. <a href="https://henrydore.github.io/EPS/">EPS @ GitHub Pages</a>
 
+v2.2
+<a href="eps2-2.html">Working 2-channel graphing</a> (STABLE)
+
 v2.1
 <a href="eps2-1.html">Improved log and GUI</a> (STABLE)
 
