@@ -9,7 +9,7 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
  
   </tr>
   <tr>
-    <td><a href="eps2-3.html">2.3</a></td>
+    <td><a href="eps2-3.html">v2.3</a></td>
     <td>Differential signal graphing</td>
   </tr>
   
@@ -21,11 +21,6 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
   <tr>
     <td><a href="eps2-1.html">v2.1</a></td>
     <td>Improved log and GUI</td>
-  </tr>
-  
-  <tr>
-    <td><a href=""></a></td>
-    <td></td>
   </tr>
   
   <tr>
@@ -47,6 +42,12 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <td><a href="eps1-0.html">v1.0</a></td>
     <td>Initial test</td>
   </tr>
+      
+  <tr>
+    <td><a href=""></a></td>
+    <td></td>
+  </tr>
+  
 </table>
 
 # Tests:
