@@ -42,12 +42,15 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <td><a href="eps1-0.html">v1.0</a></td>
     <td>Initial test</td>
   </tr>
-      
+ <!-- Blank table entry for copying
+
   <tr>
     <td><a href=""></a></td>
     <td></td>
   </tr>
   
+ -->
+ 
 </table>
 
 # Tests:
