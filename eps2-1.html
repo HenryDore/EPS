@@ -1,0 +1,170 @@
+<html>
+
+<head>
+    <title>Puck.js Improved Web-Bluetooth connection V2.1</title>
+    <style>
+div {
+    height: 800px;
+    border: 1px solid black;
+    margin: 25px 50px 75px 100px;
+    background-color: gray;
+    overflow: scroll;
+}
+</style>
+</head>
+
+<body>
+    <center><button>Connect</button><button>Disconnect</button><button>Clear Log</button></center><br />
+    
+<div>
+    <pre id="log"></pre></div>
+    
+
+    <script src="https://www.puck-js.com/puck.js"></script>
+
+    <script type="text/javascript">
+        
+        var button = document.getElementsByTagName('button')[0];
+        var button2 = document.getElementsByTagName('button')[1];
+        var button3 = document.getElementsByTagName('button')[2];
+        var logelement = document.getElementById('log');
+
+        // New variables
+        var EPS1V = 0;
+        var EPS2V = 0;
+        var EPSMAIN = 0;
+        var data = new Int16Array(100);
+        
+        var elements = {EPS1:"null",EPS2:"null"};
+        //var elements = {"John", "age":30, "car":null};
+        
+        /*
+        var elements = {"employees":[
+            {"firstName":"EPS1"}, 
+            {"firstName":"EPS2"}
+        ]}
+        */
+        
+        function log(txt) {
+            logelement.innerHTML += txt + "\n";
+        }
+
+        // Called when we get a line of data (OLD CODE)
+        function onLine(v) {
+        log(v);
+        try { var j = JSON.parse(v);
+        log(j.EPS1);
+        log(j.EPS2);
+        if (j.EPS1 !== undefined) {EPS1V = j.EPS1;};
+        if (j.EPS2 !== undefined) {EPS2V = j.EPS2;};
+        log(EPS1V);
+        log(EPS2V);
+        
+        } catch (e) { // else return failed line
+                log("Failed Received: ", v);
+            }
+        //var j = JSON.parse(v);
+        //log(j);
+          //  if (v.indexOf("Pressed") >= 0) {
+          //      log("Calling IFTTT");
+          //      ifttt();
+          //  }
+        }
+        
+        
+        /* New onLine() function
+        function onLine(line) { // on recieving a line of data
+            try { // attempt to parse the data
+                var j = JSON.parse(line);
+                var buffer1 = j.EPS1; // buffer for comparison - could not compare JSON objects?
+                var buffer2 = j.EPS2;
+                if (buffer1 !== undefined) {
+                    EPS1V = buffer1;
+                };
+                if (buffer2 !== undefined) {
+                    EPS2V = buffer2;
+                };
+                //elements.EPS1.setValue(EPS1V);
+                //elements.EPS2.setValue(EPS2V);
+                log("========================"); // debugging information sent to console
+                log("j.EPS1=", j.EPS1);
+                log("j.EPS2=", j.EPS2);
+                log("buffer1=", buffer1);
+                log("buffer2=", buffer2);
+                log("EPS1V=", EPS1V);
+                log("EPS2V=", EPS2V);
+                log("EPS1V-EPS2V=", EPS1V - EPS2V);
+                log("========================");
+            } catch (e) { // else return failed line
+                log("Failed Received: ", line);
+            }
+        }
+        */
+        
+        // When clicked, connect or disconnect
+        var connection;
+
+        button2.addEventListener("click", function() {
+            if (connection) {
+                connection.close();
+                connection = undefined;
+                
+                log("Connection Closed");
+                
+            }
+        })
+        
+        button3.addEventListener("click", function() {
+            
+                logelement.innerHTML ="";
+                log("========="); 
+                log("Log Reset");
+                log("=========");                 
+            
+        })
+        
+        button.addEventListener("click", function() {
+            if (connection) {
+                log("Closing connection");
+                connection.close();
+                connection = undefined;
+            }
+            log("Opening connection");
+            Puck.connect(function(c) {
+                if (!c) {
+                    log("Couldn't connect!");
+                    return;
+                }
+                log("Connecting...");
+                connection = c;
+                // Handle the data we get back, and call 'onLine'
+                // whenever we get a line
+                var buf = "";
+                connection.on("data", function(d) {
+                    buf += d;
+                    var i = buf.indexOf("\n");
+                    while (i >= 0) {
+                        onLine(buf.substr(0, i));
+                        buf = buf.substr(i + 1);
+                        i = buf.indexOf("\n");
+                    }
+                });
+                // First, reset Puck.js
+                connection.write("reset();\n", function() { // First, reset Puck.js
+                    setTimeout(function() { // Wait for it to reset itself
+                        // Tell puck to write analogueRead to pins D28 & D29 to Bluetooth at 10 ms intervals
+                        // When disconnected, Puck.js resets so the setInterval doesn't keep draining battery.
+                        connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS1:analogRead(D28)}))},10);NRF.on('disconnect', function() {reset()});\n", function() {
+                            console.log("Ready...");
+                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D29)}))},10);NRF.on('disconnect', function() {reset()});\n", function() {
+                                console.log("Ready...");
+                            });
+                        }, 1000); //eo setTimeout});
+                    }, 1000); //eo setTimeout
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
