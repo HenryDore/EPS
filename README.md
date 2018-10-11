@@ -3,7 +3,7 @@
 The test repository for the EPS project. <a href="https://henrydore.github.io/EPS/">EPS @ GitHub Pages</a>
 
 v2.3
-<a href="eps2-3.html">Differential signal graphing</a> (IN PROGRESS)
+<a href="eps2-3.html">Differential signal graphing</a> (STABLE)
 
 v2.2
 <a href="eps2-2.html">Working 2-channel graphing</a> (STABLE)
