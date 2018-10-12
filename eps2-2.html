@@ -47,7 +47,7 @@ div {
     
     <script type="text/javascript">
         var samples = 100;
-        var speed = 250;
+        var speed = 1;
         
         var values1 = [];
         var values2 = [];
@@ -276,9 +276,9 @@ div {
                     setTimeout(function() { // Wait for it to reset itself
                         // Tell puck to write analogueRead to pins D28 & D29 to Bluetooth at 10 ms intervals
                         // When disconnected, Puck.js resets so the setInterval doesn't keep draining battery.
-                        connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS1:analogRead(D28)}))},10);NRF.on('disconnect', function() {reset()});\n", function() {
+                        connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS1:analogRead(D28)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
                            // log("Ready...");
-                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D31)}))},10);NRF.on('disconnect', function() {reset()});\n", function() {
+                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D31)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
                             //    log("Ready...");
                             });
                         }, 1000); //eo setTimeout});
