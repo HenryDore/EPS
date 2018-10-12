@@ -32,7 +32,7 @@
     
     <br><br><br>
     
-        <canvas id="chart0" style="width:512px;height:320px"></canvas>
+        <canvas id="chart0" style="width:800px;height:800px"></canvas>
     
     </center>
 
@@ -89,8 +89,8 @@
                         }],
                         yAxes: [{
                             ticks: {
-                                max: 0.1,
-                                min: -0.1
+                                max: 0.04,
+                                min: -0.04
                             }
                         }]
                     }
@@ -186,7 +186,7 @@
                         // When disconnected, Puck.js resets so the setInterval doesn't keep draining battery.
                         connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS1:analogRead(D28)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
                             // log("Ready...");
-                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D29)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
+                            connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({EPS2:analogRead(D31)}))},1);NRF.on('disconnect', function() {reset()});\n", function() {
                                 //    log("Ready...");
                             });
                         }, 1000); //eo setTimeout});
