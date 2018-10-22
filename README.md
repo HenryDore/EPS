@@ -55,4 +55,8 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
 
 Random tests and thoughts on future work
 
+<a href="datav1.html">Data testings (oneshot)</a>
+
+<br>
+
 <a href="test1.html">Improved connection protocol</a>
