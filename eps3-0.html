@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>EPS V3.0</title>
+	<script src="Chart.bundle.js"></script>
+	<script src="utils.js"></script>
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+
+<body>	<center>
+
+	<div style="width:75%;">
+	<canvas id="canvas"></canvas>
+	</div>
+
+	<br>
+	<br>
+
+	<button id="startData">Start</button>
+	<button id="stopData">Stop</button>
+
+	</center>
+
+	<script>
+	/*
+		  var EPSvalues;
+
+			var i;
+			for (i = 1; i < 100; i++) {
+			    EPSvalues[i] = Math.random()/10;
+			}
+*/
+
+	var EPSvalues = [];
+	for (var i = 0, t = 200; i < t; i++) {
+	    EPSvalues.push(Math.random())
+	}
+
+	var EPSindex = [];
+	for (var i = 0, t = 200; i < t; i++) {
+	    EPSindex.push(i)
+	}
+
+	var myVar;
+
+	var config = {
+	    type: 'line',
+	    data: {
+	        labels: EPSindex,
+	        datasets: [{
+	            label: 'EPS Data',
+
+	            data: EPSvalues,
+	            fill: false,
+	        }]
+	    },
+	    options: {
+	        responsive: true,
+	        title: {
+	            display: true,
+	            text: 'EPS V3.0'
+	        },
+	        tooltips: {
+	            mode: 'index',
+	            intersect: false,
+	        },
+	        hover: {
+	            mode: 'nearest',
+	            intersect: true
+	        },
+	        scales: {
+	            xAxes: [{
+	                display: false,
+	                scaleLabel: {
+	                    display: true,
+	                    labelString: 'Time'
+	                }
+	            }],
+	            yAxes: [{
+	                display: true,
+	                scaleLabel: {
+	                    display: true,
+	                    labelString: 'Value'
+	                }
+	            }]
+	        }
+	    }
+	};
+
+	window.onload = function() {
+	    var ctx = document.getElementById('canvas').getContext('2d');
+	    myLine = new Chart(ctx, config);
+	};
+
+	function stopFunction() {
+	    clearInterval(myVar);
+	}
+
+	function replaceDataFunction() {
+	    myLine.destroy();
+
+	    var EPSvalues = [];
+	    for (var i = 0, t = 200; i < t; i++) {
+	        EPSvalues.push(Math.random())
+
+	    }
+
+
+
+	    var config = {
+	        type: 'line',
+	        data: {
+	            labels: EPSindex,
+	            datasets: [{
+	                label: 'EPS Data',
+
+	                data: EPSvalues,
+	                fill: false,
+	            }]
+	        },
+	        options: {
+							animation: false,
+	            responsive: true,
+	            title: {
+	                display: true,
+	                text: 'Chart.js Line Chart'
+	            },
+	            tooltips: {
+	                mode: 'index',
+	                intersect: false,
+	            },
+	            hover: {
+	                mode: 'nearest',
+	                intersect: true
+	            },
+	            scales: {
+	                xAxes: [{
+	                    display: false,
+	                    scaleLabel: {
+	                        display: true,
+	                        labelString: 'Time'
+	                    }
+	                }],
+	                yAxes: [{
+	                    display: true,
+	                    scaleLabel: {
+	                        display: true,
+	                        labelString: 'Value'
+	                    }
+	                }]
+	            }
+	        }
+	    };
+
+	    var ctx = document.getElementById('canvas').getContext('2d');
+	    myLine = new Chart(ctx, config);
+	}
+
+
+	document.getElementById('startData').addEventListener('click', function() {
+			myVar = setInterval(replaceDataFunction, 1000);
+	});
+
+	document.getElementById('stopData').addEventListener('click', function() {
+	    stopFunction();
+	});
+
+	</script>
+</body>
+
+</html>
