@@ -8,6 +8,12 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <th>Details</th>
  
   </tr>
+  
+  <tr>
+    <td><a href="eps3-0.html">v3.0</a></td>
+    <td>1 second data-shots</td>
+  </tr>
+  
   <tr>
     <td><a href="eps2-3.html">v2.3</a></td>
     <td>Differential signal graphing</td>
