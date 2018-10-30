@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>EPS V3.5</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="https://www.puck-js.com/puck.js"></script>
+
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+
+<body>	<center>
+
+	<div style="width:75%;">
+	<canvas id="canvas"></canvas><br>
+
+	<button style="height:40px;width:100px" id="connect">Connect</button>
+	<button style="height:40px;width:100px" id="disconnect">Disconnect</button><br>
+
+	<canvas id="debug"></canvas>
+	</div>
+
+	<br>
+	<br>
+
+
+
+
+
+	</center>
+
+	<script>
+
+	var EPSindex = [];
+	for (var i = 0, t = 150; i < t; i++) {
+	    EPSindex.push(i)
+	}
+
+	var config = {};
+
+	window.onload = function() {
+	    var ctx = document.getElementById('canvas').getContext('2d');
+	    myLine = new Chart(ctx, config);
+	};
+
+	function displayDataFunction() {
+			myLine.destroy();
+
+						var config = {
+					type: 'line',
+					data: {
+							labels: EPSindex,
+							datasets: [{
+									label: 'EPS Data',
+
+									data: EPSdata,
+									fill: false,
+							}]
+					},
+					options: {
+							animation: false,
+							responsive: true,
+							title: {
+									display: true,
+									text: 'Chart.js Line Chart'
+							},
+							scales: {
+									xAxes: [{
+											display: false
+										}],
+									yAxes: [{
+											display: true,
+											scaleLabel: {
+													display: true,
+													labelString: 'Voltage'
+											}
+									}]
+							}
+					}
+			};
+
+			var ctx = document.getElementById('canvas').getContext('2d');
+			myLine = new Chart(ctx, config);
+	}
+
+
+	var ctx2 = document.getElementById('debug').getContext('2d');
+	ctx2.font = "20px Arial";
+
+	var totalSeconds = 0;
+
+	var timerVar = setInterval(function(){ ++totalSeconds;}, 10);
+
+
+var EPSdata = [];
+
+	function onLine(v) {
+
+		//console.log(v);
+		temp1 = v.slice(1, -2);
+
+		var temp = temp1.split(",").map(Number);
+
+		//console.log(temp);
+		temp.forEach(function(entry) {
+    	EPSdata.push(entry);
+			});
+		//console.log(EPSdata);
+		if (EPSdata.length > 127) {
+			displayDataFunction();
+			ctx2.clearRect(0, 0, canvas.width, canvas.height);
+			ctx2.fillText(totalSeconds/100 + " seconds, " + EPSdata.length +" readings",50,50);
+			EPSdata = [];
+			totalSeconds = 0;
+
+		}
+
+
+	}
+
+	// When clicked, connect or disconnect
+	var connection;
+
+  document.getElementById('disconnect').addEventListener("click", function() {
+		if (connection) {
+			connection.close();
+			connection = undefined;
+		}
+  });
+	document.getElementById('connect').addEventListener("click", function() {
+		if (connection) {
+			connection.write("reset();\n");
+			connection.close();
+			connection = undefined;
+		}
+		Puck.connect(function(c) {
+			if (!c) {
+				alert("Couldn't connect!");
+				return;
+			}
+			connection = c;
+			// Handle the data we get back, and call 'onLine'
+			// whenever we get a line
+			var buf = "";
+			connection.on("data", function(d) {
+				buf += d;
+				var i = buf.indexOf("\n");
+				while (i>=0) {
+					onLine(buf.substr(0,i));
+					buf = buf.substr(i+1);
+					i = buf.indexOf("\n");
+				}
+			});
+			// First, reset Puck.js
+			connection.write("reset();\n", function() {
+				// Wait for it to reset itself
+				setTimeout(function() {
+					// Now tell it to write data on the current light level to Bluetooth
+					// 10 times a second. Also ensure that when disconnected, Puck.js
+					// resets so the setInterval doesn't keep draining battery.
+					connection.write("var myInterval;var data;var timePeriod = 5;var samples = 8;var log = Int8Array(samples);var logIndex = 0;function begin() {data = analogRead(D28)*100000;  log[logIndex] = data;  logIndex++;  if (logIndex == samples) {Bluetooth.println(JSON.stringify(log));logIndex = 0;}}myInterval = setInterval(begin, timePeriod);\n");
+				}, 1000);
+			});
+		});
+	});
+
+
+	</script>
+</body>
+
+</html>
