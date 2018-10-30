@@ -8,7 +8,12 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <th>Details</th>
  
   </tr>
-  
+
+  <tr>
+    <td><a href="eps3-5.html">v3.5</a></td>
+    <td>Shotter, very sketchy but sort of works</td>
+  </tr>
+
   <tr>
     <td><a href="eps3-0.html">v3.0</a></td>
     <td>1 second data-shots (no puck connection)</td>
