@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>EPS V3.0</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="https://www.puck-js.com/puck.js"></script>
+
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+
+<body>	<center>
+
+	<div style="width:75%;">
+	<canvas id="canvas"></canvas>
+	</div>
+
+	<br>
+	<br>
+
+	<button style="height:40px;width:100px" id="startData">Start</button>
+	<button style="height:40px;width:100px" id="stopData">Stop</button>
+	<button style="height:40px;width:100px" id="connect">Connect</button>
+	<button style="height:40px;width:100px" id="display">Display</button>
+
+
+
+	</center>
+
+	<script>
+	/*
+		  var EPSvalues;
+
+			var i;
+			for (i = 1; i < 100; i++) {
+			    EPSvalues[i] = Math.random()/10;
+			}
+*/
+
+	var EPSvalues = [];
+	for (var i = 0, t = 200; i < t; i++) {
+	    EPSvalues.push(Math.random())
+	}
+
+	var EPSindex = [];
+	for (var i = 0, t = 200; i < t; i++) {
+	    EPSindex.push(i)
+	}
+
+	var myVar;
+
+	var config = {
+	    type: 'line',
+	    data: {
+	        labels: EPSindex,
+	        datasets: [{
+	            label: 'EPS Data',
+
+	            data: EPSvalues,
+	            fill: false,
+	        }]
+	    },
+	    options: {
+	        responsive: true,
+	        title: {
+	            display: true,
+	            text: 'EPS V3.0'
+	        },
+	        tooltips: {
+	            mode: 'index',
+	            intersect: false,
+	        },
+	        hover: {
+	            mode: 'nearest',
+	            intersect: true
+	        },
+	        scales: {
+	            xAxes: [{
+	                display: false,
+	                scaleLabel: {
+	                    display: true,
+	                    labelString: 'Time'
+	                }
+	            }],
+	            yAxes: [{
+	                display: true,
+	                scaleLabel: {
+	                    display: true,
+	                    labelString: 'Value'
+	                }
+	            }]
+	        }
+	    }
+	};
+
+	window.onload = function() {
+	    var ctx = document.getElementById('canvas').getContext('2d');
+	    myLine = new Chart(ctx, config);
+	};
+
+	function stopFunction() {
+	    clearInterval(myVar);
+	}
+
+	function replaceDataFunction() {
+	    myLine.destroy();
+
+	    var EPSvalues = [];
+	    for (var i = 0, t = 200; i < t; i++) {
+	        EPSvalues.push(Math.random())
+
+	    }
+
+
+
+	    var config = {
+	        type: 'line',
+	        data: {
+	            labels: EPSindex,
+	            datasets: [{
+	                label: 'EPS Data',
+
+	                data: EPSvalues,
+	                fill: false,
+	            }]
+	        },
+	        options: {
+							animation: false,
+	            responsive: true,
+	            title: {
+	                display: true,
+	                text: 'Chart.js Line Chart'
+	            },
+	            tooltips: {
+	                mode: 'index',
+	                intersect: false,
+	            },
+	            hover: {
+	                mode: 'nearest',
+	                intersect: true
+	            },
+	            scales: {
+	                xAxes: [{
+	                    display: false,
+	                    scaleLabel: {
+	                        display: true,
+	                        labelString: 'Time'
+	                    }
+	                }],
+	                yAxes: [{
+	                    display: true,
+	                    scaleLabel: {
+	                        display: true,
+	                        labelString: 'Value'
+	                    }
+	                }]
+	            }
+	        }
+	    };
+
+	    var ctx = document.getElementById('canvas').getContext('2d');
+	    myLine = new Chart(ctx, config);
+	}
+
+	function displayDataFunction() {
+			myLine.destroy();
+
+						var config = {
+					type: 'line',
+					data: {
+							labels: EPSindex,
+							datasets: [{
+									label: 'EPS Data',
+
+									data: array,
+									fill: false,
+							}]
+					},
+					options: {
+							animation: false,
+							responsive: true,
+							title: {
+									display: true,
+									text: 'Chart.js Line Chart'
+							},
+							tooltips: {
+									mode: 'index',
+									intersect: false,
+							},
+							hover: {
+									mode: 'nearest',
+									intersect: true
+							},
+							scales: {
+									xAxes: [{
+											display: false,
+											scaleLabel: {
+													display: true,
+													labelString: 'Time'
+											}
+									}],
+									yAxes: [{
+											display: true,
+											scaleLabel: {
+													display: true,
+													labelString: 'Value'
+											}
+									}]
+							}
+					}
+			};
+
+			var ctx = document.getElementById('canvas').getContext('2d');
+			myLine = new Chart(ctx, config);
+	}
+
+
+	document.getElementById('startData').addEventListener('click', function() {
+			myVar = setInterval(replaceDataFunction, 1000);
+	});
+
+	document.getElementById('stopData').addEventListener('click', function() {
+	    stopFunction();
+	});
+
+var array = new Float32Array(200);
+
+	function onLine(v) {
+		temp = JSON.stringify(v).slice(30, -5);
+		array = temp.split(", ").map(Number);
+		console.log(array);
+	}
+
+	// When clicked, connect or disconnect
+	var connection;
+
+	document.getElementById('display').addEventListener('click', function() {
+			displayDataFunction();
+	});
+
+
+	document.getElementById('connect').addEventListener("click", function() {
+		if (connection) {
+			connection.close();
+			connection = undefined;
+		}
+		Puck.connect(function(c) {
+			if (!c) {
+				alert("Couldn't connect!");
+				return;
+			}
+			connection = c;
+			// Handle the data we get back, and call 'onLine'
+			// whenever we get a line
+			var buf = "";
+			connection.on("data", function(d) {
+				buf += d;
+				var i = buf.indexOf("\n");
+				while (i>=0) {
+					onLine(buf.substr(0,i));
+					buf = buf.substr(i+1);
+					i = buf.indexOf("\n");
+				}
+			});
+			// First, reset Puck.js
+			connection.write("reset();\n", function() {
+				// Wait for it to reset itself
+				setTimeout(function() {
+					// Now tell it to write data on the current light level to Bluetooth
+					// 10 times a second. Also ensure that when disconnected, Puck.js
+					// resets so the setInterval doesn't keep draining battery.
+					connection.write("var timePeriod = 5;var samples = 200;var log = new Float32Array(samples);var logIndex = 0;function storeMyData(data) {if (logIndex >= log.length) logIndex = 0;log[logIndex] = data;logIndex++;}function getData() {var data = analogRead(D28);storeMyData(data);}function dump() {console.log(log);}function begin() {getData();if (logIndex == samples) {clearInterval(myInterval);dump();}}var myInterval = setInterval(begin, timePeriod);\n");
+				}, 1000);
+			});
+		});
+	});
+
+
+	</script>
+</body>
+
+</html>
