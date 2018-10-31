@@ -20,7 +20,7 @@
 	
 	
 	<center>
-EPS V4.1<br>
+EPS V4.1 Rev Aaaargh<br>
 	<div style="width:75%;">
 	<canvas id="canvas"></canvas><br>
 
@@ -172,8 +172,7 @@ var EPSdata = [];
 					// Now tell it to write data on the current light level to Bluetooth
 					// 10 times a second. Also ensure that when disconnected, Puck.js
 					// resets so the setInterval doesn't keep draining battery.
-					connection.write("var packet = [];setInterval(function() {for (var i = 0; i < 4; i++) {(function(index) {setTimeout(function(){packet[index] = analogRead(D28).toFixed(3)*1000;}, i * 5);})(i);}Bluetooth.println(JSON.stringify(packet));}, 20);
-\n");
+					connection.write("var packet = [];setInterval(function() {for (var i = 0; i < 4; i++) {(function(index) {setTimeout(function(){packet[index] = analogRead(D28).toFixed(3)*1000;}, i * 5);})(i);}Bluetooth.println(JSON.stringify(packet));}, 20);\n");
 				}, 1000);
 			});
 		});
