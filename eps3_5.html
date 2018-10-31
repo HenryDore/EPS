@@ -20,7 +20,7 @@
 	
 	
 	<center>
-REV E<br>
+REV F<br>
 	<div style="width:75%;">
 	<canvas id="canvas"></canvas><br>
 
@@ -62,9 +62,9 @@ REV E<br>
 							labels: EPSindex,
 							datasets: [{
 									label: 'EPS Data',
-
 									data: EPSdata,
 									fill: false,
+									cubicInterpolationMode: 'monotone'
 							}]
 					},
 					options: {
@@ -76,7 +76,7 @@ REV E<br>
 										}],
 									yAxes: [{
 											display: true,
-											type: 'logarithmic',
+											
 											scaleLabel: {
 													display: true,
 													labelString: 'Voltage'
