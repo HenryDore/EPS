@@ -20,7 +20,7 @@
 	
 	
 	<center>
-REV F<br>
+REV H<br>
 	<div style="width:75%;">
 	<canvas id="canvas"></canvas><br>
 
@@ -69,12 +69,18 @@ REV F<br>
 					},
 					options: {
 							animation: false,
-							responsive: true,
+							responsive: false,
 							scales: {
 									xAxes: [{
 											display: false
 										}],
 									yAxes: [{
+										        ticks: {
+      										        	min: -30000,
+          											max: 30000,
+       										        	stepSize: 1000
+      											},
+											
 											display: true,
 											
 											scaleLabel: {
@@ -165,7 +171,7 @@ var EPSdata = [];
 					// Now tell it to write data on the current light level to Bluetooth
 					// 10 times a second. Also ensure that when disconnected, Puck.js
 					// resets so the setInterval doesn't keep draining battery.
-					connection.write("var myInterval;var data;var timePeriod = 5;var samples = 8;var log = Int16Array(samples);var logIndex = 0;function begin() {data = analogRead(D28)*10000;  log[logIndex] = data;  logIndex++;  if (logIndex == samples) {Bluetooth.println(JSON.stringify(log));logIndex = 0;}}myInterval = setInterval(begin, timePeriod);\n");
+					connection.write("var myInterval;var data;var timePeriod = 5;var samples = 8;var log = Int16Array(samples);var logIndex = 0;function begin() {data = analogRead(D28)*100000;  log[logIndex] = data;  logIndex++;  if (logIndex == samples) {Bluetooth.println(JSON.stringify(log));logIndex = 0;}}myInterval = setInterval(begin, timePeriod);\n");
 				}, 1000);
 			});
 		});
