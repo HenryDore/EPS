@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>EPS V5.0 Rev Andorrian</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="https://www.puck-js.com/puck.js"></script>
+
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+
+<body>
+	
+	
+	<center>
+	EPS V5.0 Rev Andorrian
+	<br>
+	<div style="width:75%;">
+	<canvas id="canvas"></canvas><br>
+
+	<button style="height:40px;width:100px" id="connect">Connect</button>
+	<button style="height:40px;width:100px" id="disconnect">Disconnect</button><br>
+	<button style="height:40px;width:100px" id="startDisplay">Start graph</button><br>
+	<button style="height:40px;width:100px" id="stopDisplay">Stop Graph</button><br>
+
+
+	<canvas id="debug"></canvas>
+	</div>
+
+	<br>
+	<br>
+
+
+
+
+
+	</center>
+
+	<script>
+	
+	
+var EPSindex = [];
+for (var i = 0, t = 200; i < t; i++) {
+    EPSindex.push(i)
+}
+
+var config = {};
+
+window.onload = function() {
+    var ctx = document.getElementById('canvas').getContext('2d');
+    myLine = new Chart(ctx, config);
+};
+
+function displayDataFunction() {
+    myLine.destroy();
+
+    var config = {
+        type: 'line',
+        data: {
+            labels: EPSindex,
+            datasets: [{
+                label: 'EPS Data',
+                data: EPSdata,
+                fill: false,
+                cubicInterpolationMode: 'monotone'
+            }]
+        },
+        options: 
+		{
+			elements: { point: { radius: 0 } },
+            animation: false,
+            responsive: false,
+            scales: {
+                xAxes: [{
+                    display: false
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 1000,
+                        stepSize: 10
+                    },
+
+                    display: false,
+
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Voltage'
+                    }
+                }]
+            }
+        }
+    };
+
+    var ctx = document.getElementById('canvas').getContext('2d');
+    myLine = new Chart(ctx, config);
+}
+
+
+var ctx2 = document.getElementById('debug').getContext('2d');
+ctx2.font = "20px Arial";
+
+var totalSeconds = 0;
+
+var timerVar = setInterval(function() {
+    ++totalSeconds;
+}, 10);
+
+
+var EPSdata = [];
+
+function onLine(v) {
+
+    console.log(v);
+    temp1 = v.slice(1, -2); //trim brackets
+
+    var temp = temp1.split(",").map(Number); //split string and map into numbers
+
+    temp.forEach(function(entry) { //push pin data into EPSdata array
+        EPSdata.push(entry);
+    });
+    if (EPSdata.length > 200) {
+
+
+    }
+
+
+}
+document.getElementById('startDisplay').addEventListener("click", function() {
+
+	var graphTimer = setInterval (function(){
+
+        displayDataFunction();
+        ctx2.clearRect(0, 0, canvas.width, canvas.height);
+        ctx2.fillText(totalSeconds / 100 + " seconds, " + EPSdata.length + " readings", 50, 50);
+        EPSdata = [];
+        totalSeconds = 0;
+
+	},1000);
+
+});
+
+document.getElementById('stopDisplay').addEventListener("click", function() {
+
+clearInterval(graphTimer);
+
+});
+
+
+// When clicked, connect or disconnect
+var connection;
+
+document.getElementById('disconnect').addEventListener("click", function() {
+    if (connection) {
+        connection.close();
+        connection = undefined;
+    }
+});
+document.getElementById('connect').addEventListener("click", function() {
+    if (connection) {
+        connection.write("reset();\n");
+        connection.close();
+        connection = undefined;
+    }
+    Puck.connect(function(c) {
+        if (!c) {
+            alert("Couldn't connect!");
+            return;
+        }
+        connection = c;
+        // Handle the data we get back, and call 'onLine'
+        // whenever we get a line
+        var buf = "";
+        connection.on("data", function(d) {
+            buf += d;
+            var i = buf.indexOf("\n");
+            while (i >= 0) {
+                onLine(buf.substr(0, i));
+                buf = buf.substr(i + 1);
+                i = buf.indexOf("\n");
+            }
+        });
+        // First, reset Puck.js
+        connection.write("reset();\n", function() {
+            // Wait for it to reset itself
+            setTimeout(function() {
+                // Now tell it to read pin D28 4 times per second
+                // Also ensure that when disconnected, Puck.js
+                // resets so the setInterval doesn't keep draining battery.
+                connection.write("E.setFlags({pretokenise:1});var packet = [];setInterval(function() {for (var i = 0; i < 4; i++) {(function(index) {setTimeout(function(){packet[index] = analogRead(D28).toFixed(3)*1000;}, i * 5);})(i);}Bluetooth.println(JSON.stringify(packet));}, 20);\n");
+            }, 1000);
+        });
+    });
+});
+	</script>
+</body>
+
+</html>
