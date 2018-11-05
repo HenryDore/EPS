@@ -1,0 +1,227 @@
+<head>
+	<title>EPS V9.1 A new H(TML)ope</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="reps/puck.js"></script>
+
+</head>
+
+<script src="reps/Chart.min.js"></script>
+
+<body>
+	
+	<center>
+	
+	<canvas id="chart"></canvas>
+	<br>
+	<button style="height:40px;width:100px" id="connect">Connect</button>
+	<button style="height:40px;width:100px" id="disconnect">Disconnect</button>
+
+	<button style="height:40px;width:100px" id="debug1">Log</button>
+	<button style="height:40px;width:100px" id="debug2">Debug 2</button>
+	
+	<button style="height:40px;width:50px" id="phaseL">&#8592;</button>
+	<button style="height:40px;width:50px" id="phaseR">&#8594;</button>
+
+	
+
+	</center>
+
+</body>
+
+<script>
+												//Global variables
+var connection;
+var EPSindex = [];
+var EPSdata =[];
+var q;
+var highest = 0;
+var ctx = document.getElementById('chart').getContext("2d");
+var threshold;
+var rollingMax = [0];
+var graphTimer;
+
+/*
+for (var i = 0; i < 120; i++) {					//tell the chart how wide it is
+	EPSindex.push(i);							//this shouldnt be necessary, must fix!
+};
+*/
+var myChart = new Chart(ctx, {					//chart information for chart.js
+        type: 'line',
+        data: {
+            labels: EPSindex,
+            datasets: [{
+                label: 'EPS Data',
+                data: EPSdata,
+                borderColor: window.chartColors.red,
+                fill: false,
+                cubicInterpolationMode: 'monotone'
+            }]
+        },
+        options: 
+		{
+			elements: { point: { radius: 3 } },
+            animation: false,
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    display: false
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 1000,
+                        stepSize: 200
+                    },
+
+                    display: true,
+
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'ADC value'
+                    }
+                }]
+            }
+        }
+});
+
+function addData(chart, data, datasetIndex) {	//update chart.js canvas
+   chart.data.datasets[datasetIndex].data = data;
+   chart.data.labels = EPSindex;
+   chart.update();
+};
+
+function onLine(v) {							//on getting a line of data add it to EPSdata array, also generate
+												//the relevant entry for the label in EPSindex so chart.js will display it
+    EPSdata.push(v);
+    
+    q++;
+    
+    EPSindex.push(q);
+}
+
+function averageOf(z) {							//return avarage of array
+	var sum = 0;
+	for ( var i = 0; i < z.length; i++ ){
+		sum += parseInt(z[i],10);
+	}
+return  sum / z.length;
+}
+
+function mainLoop(){							//Main program loop
+		
+		graphTimer = setInterval (function(){	//begin main program loop (every second)
+				
+		var maxVal = Math.max(...EPSdata);		//get maximum value in 1s
+		
+		if (rollingMax.length > 9) {			//ensure there are only 10 values for computing rolling average
+			rollingMax.shift();
+		};
+		
+		if (isFinite(maxVal)) {					//do not add NaNs into rollingMax array
+			rollingMax.push(maxVal);			//add current max into rollingMax array
+		}
+		 
+		threshold = averageOf(rollingMax)*0.9;	//make threshold 90% of rolling maximum average
+		console.log(threshold);
+		
+		var highest = 0;						
+		
+		for (var i = 1; i < EPSdata.length; i++) {
+			if (EPSdata[i] > highest) {
+				var maxValIndex = i+1;
+				highest = EPSdata[i];
+			}
+		}
+			
+		addData(myChart, EPSdata, 0);			//redraw graph and reset EPSdata and EPS
+	    EPSdata = [];							//might be better to use push/shift?
+	    EPSindex = [];
+	        
+		q=0;
+		
+	},1000);
+}
+
+												//Eventlisteners for buttons
+document.getElementById('debug1').addEventListener("click", function() {
+	//console.log(EPSindex);
+	//console.log(EPSdata);
+	console.log(chart.data.datasets[0].data);
+	console.log(chart.data.labels);
+	
+
+});
+
+document.getElementById('debug2').addEventListener("click", function() {
+	for (var i = 1; i < 20; i++) {
+		EPSdata.push(0);
+		EPSindex.push(0);
+	}
+
+});
+
+												//alter phase of signal, doesnt really work!
+document.getElementById('phaseL').addEventListener("click", function() {
+	clearInterval(graphTimer);
+	setTimeout(function() {
+		mainLoop();
+		},980)
+});
+
+document.getElementById('phaseR').addEventListener("click", function() {
+
+    clearInterval(graphTimer);
+	setTimeout(function() {
+		mainLoop();
+		},20)
+});
+
+												//close bluetooth connection and cancel main loop
+document.getElementById('disconnect').addEventListener("click", function() {
+    if (connection) {
+        connection.close();
+        connection = undefined;
+    }
+    clearInterval(graphTimer);
+});
+
+												//connect and start main loop
+document.getElementById('connect').addEventListener("click", function() {
+    if (connection) {							//if already connected reset and reconnect
+        connection.write("reset();\n");
+        connection.close();
+        connection = undefined;
+    }
+    Puck.connect(function(c) {
+		mainLoop();
+        if (!c) {
+            alert("Couldn't connect!");
+            return;
+        }
+
+        connection = c;
+        var buf = "";							// Handle the data we get back, and call 'onLine'
+        connection.on("data", function(d) {		// whenever we get a line
+            buf += d;
+            var i = buf.indexOf("\n");
+            while (i >= 0) {
+                onLine(buf.substr(0, i));
+                buf = buf.substr(i + 1);
+                i = buf.indexOf("\n");
+            }
+        });
+        
+												// First, reset Puck.js
+        connection.write("reset();\n", function() {
+            setTimeout(function() {
+												// Now tell it to read pin D28 100 times per second
+                connection.write("p=0;setInterval(function(){p=analogRead(D28).toFixed(3)*1000;Bluetooth.println(p)},10);\n");
+            }, 3000);
+        });
+    });
+});
+
+
+
+</script>
