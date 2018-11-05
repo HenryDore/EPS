@@ -8,6 +8,11 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <th>Details</th>
  
   </tr>
+  
+  <tr>
+    <td><a href="eps9-0.html">v9.0</a></td>
+    <td>Stronger and stabler</td>
+  </tr>
 
   <tr>
     <td><a href="eps8-0.html">v8.0</a></td>
