@@ -1,0 +1,176 @@
+<head>
+	<title>EPS V9.0 A new H(TML)ope</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="reps/puck.js"></script>
+
+</head>
+
+<script src="Chart.min.js"></script>
+
+<body>
+	
+	<center>
+	
+	<canvas id="chart"></canvas>
+	<br>
+	<button style="height:40px;width:100px" id="connect">Connect</button>
+	<button style="height:40px;width:100px" id="disconnect">Disconnect</button>
+
+	<button style="height:40px;width:100px" id="debug1">Log</button>
+	<button style="height:40px;width:100px" id="debug2">?</button>
+
+	</center>
+
+</body>
+
+<script>
+
+var EPSindex = [];
+
+for (var i = 0; i < 100; i++) {
+	EPSindex.push(i);
+};
+
+var EPSdata =[];
+
+var q;
+
+
+var ctx = document.getElementById('chart').getContext("2d");
+
+var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: EPSindex,
+            datasets: [{
+                label: 'EPS Data',
+                data: EPSdata,
+                borderColor: window.chartColors.red,
+                fill: false,
+                cubicInterpolationMode: 'monotone'
+            }]
+        },
+        options: 
+		{
+			elements: { point: { radius: 3 } },
+            animation: false,
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    display: false
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 1000,
+                        stepSize: 200
+                    },
+
+                    display: true,
+
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'ADC value'
+                    }
+                }]
+            }
+        }
+});
+
+
+
+function addData(chart, data, datasetIndex) {
+   chart.data.datasets[datasetIndex].data = data;
+   chart.update();
+};
+
+document.getElementById('debug1').addEventListener("click", function() {
+	console.log(EPSindex);
+	console.log(EPSdata);
+
+});
+
+document.getElementById('debug2').addEventListener("click", function() {
+		console.log(myChart.data.datasets[0].data);
+
+});
+
+
+
+function onLine(v) {
+  
+    EPSdata.push(v);
+    
+    q++;
+    
+    EPSindex.push(q);
+    
+}
+
+var	graphTimer = setInterval (function(){
+		
+	addData(myChart, EPSdata, 0);
+    
+    EPSdata = [];
+        
+    EPSindex = [];
+        
+	q=0;
+	
+
+		
+},1000);
+
+
+
+// When clicked, connect or disconnect
+var connection;
+
+document.getElementById('disconnect').addEventListener("click", function() {
+    if (connection) {
+        connection.close();
+        connection = undefined;
+    }
+    clearInterval(graphTimer);
+});
+document.getElementById('connect').addEventListener("click", function() {
+    if (connection) {
+        connection.write("reset();\n");
+        connection.close();
+        connection = undefined;
+    }
+    Puck.connect(function(c) {
+        if (!c) {
+            alert("Couldn't connect!");
+            return;
+        }
+        connection = c;
+        // Handle the data we get back, and call 'onLine'
+        // whenever we get a line
+        var buf = "";
+        connection.on("data", function(d) {
+            buf += d;
+            var i = buf.indexOf("\n");
+            while (i >= 0) {
+                onLine(buf.substr(0, i));
+                buf = buf.substr(i + 1);
+                i = buf.indexOf("\n");
+            }
+        });
+        // First, reset Puck.js
+        connection.write("reset();\n", function() {
+            // Wait for it to reset itself
+            setTimeout(function() {
+                // Now tell it to read pin D28 4 times per second
+                // Also ensure that when disconnected, Puck.js
+                // resets so the setInterval doesn't keep draining battery.
+                connection.write("p=0;setInterval(function(){p=analogRead(D28).toFixed(3)*1000;Bluetooth.println(p)},10);\n");
+            }, 3000);
+        });
+    });
+});
+
+
+
+</script>
