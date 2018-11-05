@@ -8,7 +8,12 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <th>Details</th>
  
   </tr>
-  
+
+  <tr>
+    <td><a href="eps9-1.html">v9.1</a></td>
+    <td>Rolling mean threshold implemented</td>
+  </tr>
+
   <tr>
     <td><a href="eps9-0.html">v9.0</a></td>
     <td>Stronger and stabler</td>
