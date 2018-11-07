@@ -1,0 +1,289 @@
+<head>
+	<title>EPS V9.2</title>
+	<script src="reps/Chart.bundle.js"></script>
+	<script src="reps/utils.js"></script>
+	<script src="reps/puck.js"></script>
+	<script src="reps/Chart.min.js"></script>
+</head>
+
+<style>
+button {
+	height:30px;
+	width:100px;
+}
+input {
+	height: 30px;
+	width: 40px;
+}
+
+
+</style>
+
+<body>
+	<center>
+	
+	<canvas id="chart"></canvas>
+	<br>
+		
+	<button  id="connect">Connect</button>
+	<button id="disconnect">Disconnect</button>
+
+	<br><br>
+	<table>
+	<th>
+
+
+<table>
+<tr>
+	<th align = right>Peak threshold (%): </th>
+	<th>
+		<input width = 40px type ="number" id = "input1" value = "10" onchange="input1Change(this.value)">
+	</th>
+</tr>
+
+<tr>
+	<th align = right>Peak to peak samples: </th>
+	<th>
+		<input width = 40px type ="number" id = "input2" value = "5" onchange="input2Change(this.value)">
+	</th>
+</tr>
+
+<tr>
+	<th align = right>Samples for threshold: </th>
+	<th>
+		<input width = 40px type ="number" id = "input3" value = "10" onchange="input3Change(this.value)">
+	</th>
+</tr>
+
+
+</th>
+
+
+</table>	
+<th><font color="white">SPACE</font></th>
+	
+	<th>
+		
+			<canvas id="BPMDisplay" width="250" height = "75"></canvas><br>BPM
+</th>	
+	</table>
+		
+	</center>
+
+</body>
+
+<script>
+
+	
+												//Global variables
+var connection;
+var EPSindex = [];
+var EPSdata =[];
+var q;
+var highest = 0;
+var ctx = document.getElementById('chart').getContext("2d");
+var threshold;
+var rollingMax = [0];
+var graphTimer;
+var BPMIntervalTimer;
+var startTime = Date.now(); 
+var rollingPP = [0,0,0,0,0];
+var pPInterval = [0,0,0,0];
+var BPM = 60
+var BPMc = document.getElementById("BPMDisplay");
+var BPMctx = BPMc.getContext("2d");
+BPMctx.font = "70px Calibri";
+
+
+var myChart = new Chart(ctx, {					//chart information for chart.js
+        type: 'line',
+        data: {
+            labels: EPSindex,
+            datasets: [{
+                label: 'EPS Data',
+                data: EPSdata,
+                borderColor: "blue",
+                fill: false,
+                cubicInterpolationMode: 'monotone'
+            }]
+        },
+        options: 
+		{
+			elements: { point: { radius: 3 } },
+            animation: false,
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    display: false
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 1000,
+                        stepSize: 200
+                    },
+
+                    display: true,
+
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'ADC value X 10^4'
+                    }
+                }]
+            }
+        }
+});
+
+function addData(chart, data, datasetIndex) {	//update chart.js canvas
+   chart.data.datasets[datasetIndex].data = data;
+   chart.data.labels = EPSindex;
+   chart.update();
+};
+
+
+
+function isPeak(value) {						//check if value is a peak and not within 200 ms of last peak
+	if (value > threshold && Date.now() - startTime - rollingPP[rollingPP.length -1] > 200) {
+		rollingPP.push (Date.now() - startTime);
+		rollingPP.shift();
+	
+		var i;
+		
+		for (i = 0; i < 4; i++) {				//calculate peak to peak intervals
+			pPInterval[i] = rollingPP[i+1]-rollingPP[i];
+		} 
+	
+		var total = 0;							//average of pea to peak intervals to calculate BPM
+		for (var i in pPInterval) { total += pPInterval[i]; };
+		BPM = (1000/(total / 4)*60).toFixed(1);	
+	
+												//redraw BPM canvas
+		BPMctx.clearRect(0, 0, BPMc.width, BPMc.height);
+		BPMctx.strokeText(BPM, 5, 70);
+		BPMctx.fillStyle = "blue";
+		BPMctx.fillText(BPM, 5, 70);
+	
+	}
+}
+
+function onLine(v) {							//on getting a line of data add it to EPSdata array, also generate
+												//the relevant entry for the label in EPSindex so chart.js will display it
+												
+    isPeak(v);									//check if this value is a peak
+    
+    EPSdata.push(v);
+    
+    q++;
+    
+    EPSindex.push(q);
+}
+
+function averageOf(z) {							//return average of array
+	var sum = 0;
+	for ( var i = 0; i < z.length; i++ ){
+		sum += parseInt(z[i],10);
+	}
+return  sum / z.length;
+}
+
+function mainLoop(){							//Main program loop
+	
+	
+		
+	graphTimer = setInterval (function(){		//begin main program loop (every second)
+				
+		var maxVal = Math.max(...EPSdata);		//get maximum value in 1s
+		
+		if (rollingMax.length > 9) {			//ensure there are only 10 values for computing rolling average
+			rollingMax.shift();
+		};
+		
+		if (isFinite(maxVal)) {					//do not add NaNs into rollingMax array
+			rollingMax.push(maxVal);			//add current max into rollingMax array
+		}
+		 
+		threshold = averageOf(rollingMax)*0.9;	//make threshold 90% of rolling maximum average
+		//console.log(threshold);
+		
+		var highest = 0;						
+		
+		for (var i = 1; i < EPSdata.length; i++) {
+			if (EPSdata[i] > highest) {
+				var maxValIndex = i+1;
+				highest = EPSdata[i];
+			}
+		}
+			
+		addData(myChart, EPSdata, 0);			//redraw graph and reset EPSdata and EPS
+	    EPSdata = [];							//might be better to use push/shift?
+	    EPSindex = [];
+	        
+		q=0;
+		
+	},1000);
+}
+
+												//Functions for changing values in input boxes
+function input1Change(val) {
+	alert("Function not yet implemented. Input 1 is now: " + val);
+}
+
+function input2Change(val) {
+	alert("Function not yet implemented. Input 2 is now: " + val);
+}
+
+function input3Change(val) {
+	alert("Function not yet implemented. Input 3 is now: " + val);
+}
+
+												//Eventlisteners for buttons
+
+
+												//close bluetooth connection and cancel main loop
+document.getElementById('disconnect').addEventListener("click", function() {
+    if (connection) {
+        connection.close();
+        connection = undefined;
+    }
+    clearInterval(graphTimer);
+});
+
+												//connect and start main loop
+document.getElementById('connect').addEventListener("click", function() {
+    if (connection) {							//if already connected reset and reconnect
+        connection.write("reset();\n");
+        connection.close();
+        connection = undefined;
+    }
+    Puck.connect(function(c) {
+		mainLoop();
+        if (!c) {
+            alert("Couldn't connect!");
+            return;
+        }
+
+        connection = c;
+        var buf = "";							// Handle the data we get back, and call 'onLine'
+        connection.on("data", function(d) {		// whenever we get a line
+            buf += d;
+            var i = buf.indexOf("\n");
+            while (i >= 0) {
+                onLine(buf.substr(0, i));
+                buf = buf.substr(i + 1);
+                i = buf.indexOf("\n");
+            }
+        });
+        
+												// First, reset Puck.js
+        connection.write("reset();\n", function() {
+            setTimeout(function() {
+												// Now tell it to read pin D28 100 times per second
+                connection.write("p=0;setInterval(function(){p=analogRead(D28).toFixed(3)*1000;Bluetooth.println(p)},10);\n");
+            }, 3000);
+        });
+    });
+});
+
+
+
+</script>
