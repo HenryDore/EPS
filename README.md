@@ -8,7 +8,13 @@ The test repository for the EPS project. <a href="https://henrydore.github.io/EP
     <th>Details</th>
  
   </tr>
+
   
+  <tr>
+    <td><a href="eps9-3.html">v9.3</a></td>
+    <td>.CSV export and variable threshold</td>
+  </tr>
+
   <tr>
     <td><a href="eps9-2.html">v9.2</a></td>
     <td>BPM calculations and graphical display</td>
